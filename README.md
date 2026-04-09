@@ -113,6 +113,7 @@ opencli plugin install file://$(pwd)
 2. **浏览器扩展**：需要安装 OpenCLI Chrome 扩展
 3. **反爬检测**：BOSS直聘有反爬机制，页面可能刷新，但不影响结果
 4. **API 变更**：BOSS直聘 API 可能随时变更，如有问题请提 Issue
+5. **职位有效性**：`recommend` 返回的职位可能已下线，`detail`/`greet` 失败时（返回"缺少必要参数"）通常表示职位已不可用
 
 ## License
 
