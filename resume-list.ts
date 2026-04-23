@@ -27,36 +27,42 @@ cli({
       const result = [];
 
       // Extract online resume
-      const userInfo = document.querySelector('#userinfo');
-      if (userInfo) {
-        const nameEl = userInfo.querySelector('p');
-        const name = nameEl ? nameEl.textContent.trim() : '在线简历';
-        result.push({
-          type: '在线简历',
-          name: name,
-          updatedAt: '',
-          downloadUrl: ''
-        });
+      let onlineName = '在线简历';
+      const userNameEl = document.querySelector('#userinfo p');
+      if (userNameEl && userNameEl.textContent.trim()) {
+        onlineName = userNameEl.textContent.trim();
       }
+      result.push({
+        type: '在线简历',
+        name: onlineName,
+        updatedAt: '',
+        downloadUrl: ''
+      });
 
-      // Extract attachment resumes (placeholder - will refine later)
-      const allLi = Array.from(document.querySelectorAll('li'));
-      for (const li of allLi) {
-        const text = li.textContent || '';
-        if (text.includes('.pdf') || text.includes('.doc') || text.includes('更新于')) {
-          const titleA = li.querySelector('a[title]');
-          const downloadA = li.querySelector('a[type=download]');
-          const title = titleA ? titleA.getAttribute('title') : '';
-          const downloadUrl = downloadA ? downloadA.getAttribute('href') : '';
+      // Extract attachment resumes - look for file list section
+      // The page has an attachments section near the bottom with file items
+      const allElements = Array.from(document.body.querySelectorAll('*'));
 
-          // Try to extract update time
-          let updatedAt = '';
-          const dateMatch = text.match(/更新于[\\s]*([\\d]{4}\\.[\\d]{2}\\.[\\d]{2}[\\s]*[\\d]{2}:[\\d]{2})/);
-          if (dateMatch) {
-            updatedAt = dateMatch[1];
-          }
+      for (const el of allElements) {
+        const text = el.textContent || '';
+        // Look for elements that have a download link and a title
+        const hasDownload = el.querySelector('a[type=download]');
+        const hasTitle = el.querySelector('a[title]');
 
-          if (title) {
+        if (hasDownload && hasTitle) {
+          const title = hasTitle.getAttribute('title') || '';
+          const downloadUrl = hasDownload.getAttribute('href') || '';
+
+          // Skip if already added
+          if (title && !result.some(r => r.name === title)) {
+            // Extract update time
+            let updatedAt = '';
+            const fullText = el.textContent || '';
+            const dateMatch = fullText.match(/更新于[\\s]*([\\d]{4}\\.[\\d]{2}\\.[\\d]{2}[\\s]*[\\d]{2}:[\\d]{2})/);
+            if (dateMatch) {
+              updatedAt = dateMatch[1];
+            }
+
             result.push({
               type: '附件简历',
               name: title,
@@ -67,8 +73,33 @@ cli({
         }
       }
 
+      // Fallback: if no attachments found with above method, try simpler approach
+      if (result.length === 1) {
+        const allLi = Array.from(document.querySelectorAll('li'));
+        for (const li of allLi) {
+          const text = li.textContent || '';
+          if (text.includes('.pdf') || text.includes('.doc')) {
+            const titleA = li.querySelector('a[title]');
+            const downloadA = li.querySelector('a[type=download]');
+            if (titleA) {
+              const title = titleA.getAttribute('title') || '';
+              if (title && !result.some(r => r.name === title)) {
+                result.push({
+                  type: '附件简历',
+                  name: title,
+                  updatedAt: '',
+                  downloadUrl: downloadA ? downloadA.getAttribute('href') || '' : ''
+                });
+              }
+            }
+          }
+        }
+      }
+
       return result;
     })()`);
+
+    verbose(`Found ${resumes.length} resumes`);
 
     // Normalize and return
     return Array.isArray(resumes) ? resumes : [];
