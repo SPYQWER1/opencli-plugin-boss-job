@@ -22,11 +22,10 @@ cli({
     verbose(`Navigating to ${RESUME_URL}`);
     await navigateTo(page, RESUME_URL, 2);
 
-    // Extract resume data
     const resumes = await page.evaluate(`(function() {
       const result = [];
 
-      // Extract online resume
+      // Get online resume
       let onlineName = '在线简历';
       const userInfo = document.querySelector('#userinfo');
       if (userInfo) {
@@ -42,85 +41,58 @@ cli({
         downloadUrl: ''
       });
 
-      // Extract attachment resumes - look for download links first
-      const seenNames = new Set();
-      const downloadLinks = Array.from(document.querySelectorAll('a[type=download]'));
+      // Get attachment resumes
+      const seen = {};
+      const downloadLinks = document.querySelectorAll('a[type=download]');
 
-      for (const downloadLink of downloadLinks) {
-        let title = '';
-        let updatedAt = '';
+      for (let i = 0; i < downloadLinks.length; i++) {
+        const downloadLink = downloadLinks[i];
         const href = downloadLink.getAttribute('href') || '';
 
-        // Look for a title link nearby
+        // Find the filename
+        let name = '';
         const parent = downloadLink.parentElement;
         if (parent) {
           const titleLink = parent.querySelector('a[title]');
           if (titleLink) {
-            title = titleLink.getAttribute('title') || '';
+            name = titleLink.getAttribute('title') || '';
           }
 
-          // Extract update time
-          const fullText = parent.textContent || '';
-          const dateMatch = fullText.match(/(\\d{4}\\.\\d{2}\\.\\d{2}\\s*\\d{2}:\\d{2})/);
-          if (dateMatch) {
-            updatedAt = dateMatch[1];
-          }
-
-          // If no title link, try to find the filename in text
-          if (!title) {
-            const allText = parent.textContent || '';
-            const pdfMatch = allText.match(/([^\\s]+\\.pdf)/i);
-            const docMatch = allText.match(/([^\\s]+\\.doc[x]?)/i);
-            if (pdfMatch) title = pdfMatch[1];
-            else if (docMatch) title = docMatch[1];
+          if (!name) {
+            const text = parent.textContent || '';
+            const pdfMatch = text.match(/([^\\s]+\\.pdf)/i);
+            const docMatch = text.match(/([^\\s]+\\.doc[x]?)/i);
+            if (pdfMatch) name = pdfMatch[1];
+            else if (docMatch) name = docMatch[1];
           }
         }
 
-        // If still no title, try to look for nearby elements
-        if (!title && downloadLink) {
+        if (!name) {
           let current = downloadLink.previousElementSibling;
-          for (let i = 0; i < 5 && current; i++) {
+          for (let j = 0; j < 5 && current; j++) {
             const text = current.textContent || '';
-            if (text.includes('.pdf') || text.includes('.doc')) {
+            if (text.indexOf('.pdf') >= 0 || text.indexOf('.doc') >= 0) {
               const pdfMatch = text.match(/([^\\s]+\\.pdf)/i);
               const docMatch = text.match(/([^\\s]+\\.doc[x]?)/i);
-              if (pdfMatch) { title = pdfMatch[1]; break; }
-              else if (docMatch) { title = docMatch[1]; break; }
+              if (pdfMatch) { name = pdfMatch[1]; break; }
+              else if (docMatch) { name = docMatch[1]; break; }
             }
             current = current.previousElementSibling;
           }
         }
 
-        if (title && !seenNames.has(title)) {
-          seenNames.add(title);
+        if (name && !seen[name]) {
+          seen[name] = true;
+          let url = href;
+          if (url && url.indexOf('http') !== 0 && url.indexOf('/') === 0) {
+            url = 'https://www.zhipin.com' + url;
+          }
           result.push({
             type: '附件简历',
-            name: title,
-            updatedAt: updatedAt,
-            downloadUrl: href.startsWith('http') ? href : 'https://www.zhipin.com' + href
+            name: name,
+            updatedAt: '',
+            downloadUrl: url
           });
-        }
-      }
-
-      // Fallback: if we found nothing, try a more aggressive approach
-      if (result.length === 1) {
-        const allLinks = Array.from(document.querySelectorAll('a[href]'));
-        for (const link of allLinks) {
-          const href = link.getAttribute('href') || '';
-          const title = link.getAttribute('title') || '';
-
-          if (href.includes('download') || title.includes('.pdf') || title.includes('.doc')) {
-            const name = title || link.textContent.trim();
-            if (name && (name.includes('.pdf') || name.includes('.doc')) && !seenNames.has(name)) {
-              seenNames.add(name);
-              result.push({
-                type: '附件简历',
-                name: name,
-                updatedAt: '',
-                downloadUrl: href.startsWith('http') ? href : 'https://www.zhipin.com' + href
-              });
-            }
-          }
         }
       }
 
@@ -129,7 +101,6 @@ cli({
 
     verbose(`Found ${resumes.length} resumes`);
 
-    // Normalize and return
-    return Array.isArray(resumes) ? resumes : [];
+    return resumes;
   },
 });
