@@ -18,6 +18,7 @@ BOSS直聘求职者命令行工具 — OpenCLI 插件
 | `chatmsg` | 查看与某人的聊天消息 | API |
 | `send` | 向招聘方发送聊天消息 | UI 自动化 |
 | `resume-list` | 查看简历列表（在线简历和附件简历） | UI 自动化 |
+| `resume-upload` | 上传 PDF 简历 | UI 自动化 |
 
 ---
 
@@ -129,6 +130,22 @@ opencli boss-job send <encryptUid> "你好，请问这个职位还在招吗？"
 ```
 
 > `send` 命令通过 UI 自动化实现（BOSS直聘使用 MQTT 协议，不支持直接 HTTP 发消息）。
+
+### 简历列表
+
+```bash
+opencli boss-job resume-list
+```
+
+查看所有在线简历和附件简历。
+
+### 上传简历
+
+```bash
+opencli boss-job resume-upload /path/to/your/resume.pdf
+```
+
+上传成功后会显示最新的简历列表。
 
 ---
 
