@@ -2,6 +2,12 @@ node_modules/
 *.d.ts
 .claude/
 .opencli/
+dist/
+test-resume.pdf
+*-1
+res(*
+skills-lock.json
+.agents/
 
 # 忽略 node_modules 里的 js，但是保留插件自己的编译文件
 node_modules/**/*.js

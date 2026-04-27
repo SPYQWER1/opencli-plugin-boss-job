@@ -17,8 +17,8 @@ BOSS直聘求职者命令行工具 — OpenCLI 插件
 | `chatlist` | 查看聊天列表 | API |
 | `chatmsg` | 查看与某人的聊天消息 | API |
 | `send` | 向招聘方发送聊天消息 | UI 自动化 |
-| `resume-list` | 查看简历列表（在线简历和附件简历） | UI 自动化 |
-| `resume-upload` | 上传 PDF 简历 | UI 自动化 |
+| `resume-list` | 查看简历列表（在线简历和附件简历） | API |
+| `resume-upload` | 上传 PDF 简历 | API |
 
 ---
 
@@ -193,6 +193,10 @@ boss-geek-cli/
 | `/wapi/zpgeek/friend/add.json` | 打招呼 |
 | `/wapi/zprelation/friend/getGeekFriendList.json` | 聊天列表 |
 | `/wapi/zpchat/geek/historyMsg` | 聊天消息 |
+| `/wapi/zpgeek/resume/baseinfo/query.json` | 简历基本信息（在线简历） |
+| `/wapi/zpgeek/resume/attachment/checkbox.json` | 附件简历列表 |
+| `/wapi/zpupload/resume/uploadFile.json` | 上传简历文件 |
+| `/wapi/zpgeek/resume/attachment/save.json` | 保存附件关联 |
 
 ---
 
