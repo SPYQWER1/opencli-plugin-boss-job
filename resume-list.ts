@@ -8,7 +8,7 @@ import { requirePage, navigateTo, bossFetch, verbose } from './utils.js';
 cli({
   site: 'boss-job',
   name: 'resume-list',
-  description: '查看简历列表（在线简历和附件简历）',
+  description: '查看附件简历列表',
   domain: 'www.zhipin.com',
   strategy: Strategy.COOKIE,
   navigateBefore: false,

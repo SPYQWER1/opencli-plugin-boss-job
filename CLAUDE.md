@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `chatlist` | 聊天列表 | API |
 | `chatmsg` | 聊天记录 | API |
 | `send` | 发送消息 | UI自动化 |
-| `resume-list` | 查看简历列表（在线简历和附件简历） | API |
+| `resume-list` | 查看附件简历列表 | API |
 | `resume-upload` | 上传 PDF 简历 | API |
 | `resume-delete` | 删除附件简历 | API |
 
@@ -138,7 +138,6 @@ const data = await bossFetch(page, 'https://www.zhipin.com/wapi/zpgeek/...');
 - `/wapi/zpgeek/friend/add.json?securityId=...` - 打招呼
 - `/wapi/zprelation/friend/getGeekFriendList.json` - 聊天列表
 - `/wapi/zpchat/geek/historyMsg` - 聊天记录
-- `/wapi/zpgeek/resume/baseinfo/query.json` - 简历基本信息（在线简历）
 - `/wapi/zpgeek/resume/attachment/checkbox.json` - 附件简历列表
 - `/wapi/zpupload/resume/uploadFile.json` - 上传简历文件（POST, FormData, field=file）
 - `/wapi/zpgeek/resume/attachment/save.json?previewUrl=...&annexType=0&from=8` - 保存附件关联（POST, 需要 zp_token 请求头）
